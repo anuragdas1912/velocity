@@ -1,0 +1,46 @@
+name: Build Unsigned iOS IPA
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Generate Native iOS Project
+        run: npx expo prebuild --platform ios --no-install
+
+      - name: Build Unsigned Xcode Archive
+        run: |
+          xcodebuild \
+            -workspace ios/velocity.xcworkspace \
+            -scheme velocity \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            clean build
+
+      - name: Package to IPA
+        run: |
+          mkdir -p Payload
+          cp -r build/Build/Products/Release-iphoneos/Velocity.app Payload/
+          zip -r Velocity.ipa Payload
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Velocity-Unsigned-IPA
+          path: Velocity.ipa

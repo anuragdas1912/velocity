@@ -119,14 +119,14 @@ const styles = StyleSheet.create({
   },
   background: {
     borderRadius: 40,
-    experimental_backgroundImage: `linear-gradient(180deg, #3C9FFE, #0274DF)`,
+    backgroundColor: '#1C1C1E',
     width: 128,
     height: 128,
     position: 'absolute',
   },
   backgroundSolidColor: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: '#208AEF',
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#000000',
     zIndex: 1000,
   },
 });
