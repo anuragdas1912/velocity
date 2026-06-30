@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useMemo } from 'react';
+import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
 
 export interface Transaction {
   id: string;
@@ -35,76 +35,111 @@ interface AppContextType {
   todaySpend: number;
   personalIncome: number;
   businessIncome: number;
+  resetAllData: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Pre-populate with realistic starter entries so UI features (Chart, Rings, stats) activate immediately
-  const [transactions, setTransactions] = useState<Transaction[]>([
-    {
-      id: 'tx-starter-1',
-      amount: 45000,
-      merchant: 'Freelance Design Client (Business)',
-      category: 'utilities',
-      timestamp: new Date().toISOString(),
-      isP2P: false,
-      type: 'credit',
-      frequency: 1,
-      surcharge: 0,
-      incomeType: 'business'
-    },
-    {
-      id: 'tx-starter-2',
-      amount: 5000,
-      merchant: 'Family Cash Transfer (Personal)',
-      category: 'utilities',
-      timestamp: new Date().toISOString(),
-      isP2P: false,
-      type: 'credit',
-      frequency: 1,
-      surcharge: 0,
-      incomeType: 'personal'
-    },
-    {
-      id: 'tx-starter-3',
-      amount: 450,
-      merchant: 'Zepto Order',
-      category: 'quick_commerce',
-      timestamp: new Date().toISOString(),
-      isP2P: false,
-      type: 'debit',
-      frequency: 3,
-      surcharge: 5
-    },
-    {
-      id: 'tx-starter-4',
-      amount: 820,
-      merchant: 'Zomato Dining',
-      category: 'food_delivery',
-      timestamp: new Date().toISOString(),
-      isP2P: false,
-      type: 'debit',
-      frequency: 2,
-      surcharge: 10
-    },
-    {
-      id: 'tx-starter-5',
-      amount: 349,
-      merchant: 'Airtel Bill Recharge',
-      category: 'utilities',
-      timestamp: new Date().toISOString(),
-      isP2P: false,
-      type: 'debit',
-      frequency: 1,
-      surcharge: 0
-    }
-  ]);
+// Initial starter transactions
+const STARTER_TRANSACTIONS: Transaction[] = [
+  {
+    id: 'tx-starter-1',
+    amount: 45000,
+    merchant: 'Freelance Design Client (Business)',
+    category: 'utilities',
+    timestamp: new Date().toISOString(),
+    isP2P: false,
+    type: 'credit',
+    frequency: 1,
+    surcharge: 0,
+    incomeType: 'business'
+  },
+  {
+    id: 'tx-starter-2',
+    amount: 5000,
+    merchant: 'Family Cash Transfer (Personal)',
+    category: 'utilities',
+    timestamp: new Date().toISOString(),
+    isP2P: false,
+    type: 'credit',
+    frequency: 1,
+    surcharge: 0,
+    incomeType: 'personal'
+  },
+  {
+    id: 'tx-starter-3',
+    amount: 450,
+    merchant: 'Zepto Order',
+    category: 'quick_commerce',
+    timestamp: new Date().toISOString(),
+    isP2P: false,
+    type: 'debit',
+    frequency: 3,
+    surcharge: 5
+  },
+  {
+    id: 'tx-starter-4',
+    amount: 820,
+    merchant: 'Zomato Dining',
+    category: 'food_delivery',
+    timestamp: new Date().toISOString(),
+    isP2P: false,
+    type: 'debit',
+    frequency: 2,
+    surcharge: 10
+  },
+  {
+    id: 'tx-starter-5',
+    amount: 349,
+    merchant: 'Airtel Bill Recharge',
+    category: 'utilities',
+    timestamp: new Date().toISOString(),
+    isP2P: false,
+    type: 'debit',
+    frequency: 1,
+    surcharge: 0
+  }
+];
 
-  const [milestones, setMilestones] = useState<Milestone[]>([
-    { id: 'm-starter-1', name: 'Porsche 911 Fund', target: 5000000, current: 35000, color: '#FFFFFF' },
-    { id: 'm-starter-2', name: 'Alps Chalet Lease', target: 1200000, current: 12500, color: '#94A3B8' }
-  ]);
+const STARTER_MILESTONES: Milestone[] = [
+  { id: 'm-starter-1', name: 'Porsche 911 Fund', target: 5000000, current: 35000, color: '#00f2fe' },
+  { id: 'm-starter-2', name: 'Alps Chalet Lease', target: 1200000, current: 12500, color: '#f35588' }
+];
+
+export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Load initial data from localStorage or fallback to starter sets
+  const [transactions, setTransactions] = useState<Transaction[]>(() => {
+    const saved = localStorage.getItem('velocity_transactions');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to parse saved transactions, resetting', e);
+      }
+    }
+    return STARTER_TRANSACTIONS;
+  });
+
+  const [milestones, setMilestones] = useState<Milestone[]>(() => {
+    const saved = localStorage.getItem('velocity_milestones');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to parse saved milestones, resetting', e);
+      }
+    }
+    return STARTER_MILESTONES;
+  });
+
+  // Sync state changes to localStorage
+  useEffect(() => {
+    localStorage.setItem('velocity_transactions', JSON.stringify(transactions));
+  }, [transactions]);
+
+  useEffect(() => {
+    localStorage.setItem('velocity_milestones', JSON.stringify(milestones));
+  }, [milestones]);
 
   // AI-Driven Dynamic Daily Limit (Average Daily Outflow + 25% Optimal Safety Buffer)
   const dailyLimit = useMemo(() => {
@@ -186,6 +221,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setMilestones((prev) => prev.filter((m) => m.id !== id));
   };
 
+  const resetAllData = () => {
+    if (window.confirm('Do you want to reset all transactions and goals to starter defaults?')) {
+      setTransactions(STARTER_TRANSACTIONS);
+      setMilestones(STARTER_MILESTONES);
+    }
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -202,6 +244,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         todaySpend,
         personalIncome,
         businessIncome,
+        resetAllData,
       }}
     >
       {children}

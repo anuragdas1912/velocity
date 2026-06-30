@@ -1,30 +1,28 @@
-import React from 'react';
-import { View, StyleSheet, Dimensions, Text, Platform } from 'react-native';
-import Svg, { Path, Defs, LinearGradient, Stop, Circle } from 'react-native-svg';
+import React, { useState } from 'react';
 import { GlassCard } from './GlassCard';
-
-const { width: windowWidth } = Dimensions.get('window');
-const CHART_HEIGHT = 140;
 
 export interface QuantumChartProps {
   data: Array<{ day: string; amount: number; frequency: number; surcharge: number }>;
 }
 
 export const QuantumChart: React.FC<QuantumChartProps> = ({ data }) => {
-  const chartWidth = windowWidth - 52;
+  const [activeIdx, setActiveIdx] = useState<number | null>(null);
   
-  // Find max value to scale chart appropriately
+  const paddingX = 25;
+  const paddingY = 30;
+  const viewWidth = 400;
+  const viewHeight = 180;
+
   const maxAmount = Math.max(...data.map(d => d.amount), 1);
   
-  // Generate points coordinates
+  // Coordinates mapping
   const points = data.map((d, index) => {
-    const x = (index / (data.length - 1)) * chartWidth;
-    // Scale y coordinate, leaving a 20px padding at top and bottom
-    const y = CHART_HEIGHT - (d.amount / maxAmount) * (CHART_HEIGHT - 35) - 15;
-    return { x, y, amount: d.amount, day: d.day };
+    const x = paddingX + (index / (data.length - 1)) * (viewWidth - paddingX * 2);
+    const y = viewHeight - paddingY - (d.amount / maxAmount) * (viewHeight - paddingY * 2);
+    return { x, y, amount: d.amount, day: d.day, frequency: d.frequency };
   });
 
-  // Construct SVG Bezier path for smooth spline curve
+  // Construct SVG Bezier spline path
   let pathStr = "";
   let areaPathStr = "";
 
@@ -33,7 +31,6 @@ export const QuantumChart: React.FC<QuantumChartProps> = ({ data }) => {
     for (let i = 0; i < points.length - 1; i++) {
       const curr = points[i];
       const next = points[i+1];
-      // Control points for smooth bezier curve
       const cpX1 = curr.x + (next.x - curr.x) / 2;
       const cpY1 = curr.y;
       const cpX2 = curr.x + (next.x - curr.x) / 2;
@@ -41,114 +38,168 @@ export const QuantumChart: React.FC<QuantumChartProps> = ({ data }) => {
       pathStr += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${next.x} ${next.y}`;
     }
     
-    // For area path fill
-    areaPathStr = `${pathStr} L ${points[points.length-1].x} ${CHART_HEIGHT} L ${points[0].x} ${CHART_HEIGHT} Z`;
+    areaPathStr = `${pathStr} L ${points[points.length-1].x} ${viewHeight - paddingY} L ${points[0].x} ${viewHeight - paddingY} Z`;
   }
 
+  const activePoint = activeIdx !== null ? points[activeIdx] : null;
+
   return (
-    <GlassCard style={styles.card}>
-      <View style={styles.chartHeader}>
-        <Text style={styles.title}>WEEKLY OUTFLOW TREND</Text>
-        <Text style={styles.maxSpend}>PEAK: ₹{Math.max(...data.map(d => d.amount)).toLocaleString()}</Text>
-      </View>
+    <GlassCard className="p-4 mb-4" enableTilt={false}>
+      <div className="flex justify-between items-center mb-4 select-none">
+        <div>
+          <span className="text-[8px] font-bold text-zinc-500 tracking-widest block uppercase font-outfit">Quantum Outflow Ledger</span>
+          {activePoint ? (
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span className="text-sm font-extrabold text-white font-outfit uppercase">
+                {activePoint.day}
+              </span>
+              <span className="text-xs font-bold text-teal-400 font-outfit">
+                ₹{activePoint.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              </span>
+            </div>
+          ) : (
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span className="text-sm font-extrabold text-white font-outfit">
+                PEAK FLOW
+              </span>
+              <span className="text-xs font-bold text-zinc-400 font-outfit">
+                ₹{Math.max(...data.map(d => d.amount)).toLocaleString()}
+              </span>
+            </div>
+          )}
+        </div>
+        <div className="text-right">
+          <span className="text-[7px] font-extrabold text-zinc-500 tracking-wider block uppercase">DENSITY INDEX</span>
+          <span className="text-[10px] font-black text-indigo-400 font-outfit">
+            {activePoint ? `${activePoint.frequency} Transactions` : 'Active Feed'}
+          </span>
+        </div>
+      </div>
 
-      <View style={styles.chartContainer}>
-        <Svg width={chartWidth} height={CHART_HEIGHT}>
-          <Defs>
-            <LinearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-              <Stop offset="0" stopColor="#FFFFFF" stopOpacity="0.15" />
-              <Stop offset="1" stopColor="#FFFFFF" stopOpacity="0.0" />
-            </LinearGradient>
-          </Defs>
+      {/* Responsive interactive chart workspace */}
+      <div className="relative w-full flex items-center justify-center overflow-visible">
+        <svg 
+          viewBox={`0 0 ${viewWidth} ${viewHeight}`} 
+          className="w-full h-auto overflow-visible select-none"
+        >
+          <defs>
+            {/* Split Glow gradient */}
+            <linearGradient id="chartGlowArea" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#00f2fe" stopOpacity="0.22" />
+              <stop offset="100%" stopColor="#00f2fe" stopOpacity="0.0" />
+            </linearGradient>
+            {/* Guide line gradient */}
+            <linearGradient id="guideGlow" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="rgba(0, 242, 254, 0.4)" />
+              <stop offset="100%" stopColor="rgba(0, 242, 254, 0.02)" />
+            </linearGradient>
+          </defs>
 
-          {/* Area Fill under spline */}
-          {areaPathStr ? <Path d={areaPathStr} fill="url(#chartGrad)" /> : null}
+          {/* Grid Baseline */}
+          <line 
+            x1={paddingX} 
+            y1={viewHeight - paddingY} 
+            x2={viewWidth - paddingX} 
+            y2={viewHeight - paddingY} 
+            stroke="rgba(255, 255, 255, 0.04)" 
+            strokeWidth={1.5} 
+          />
 
-          {/* Main Spline Line */}
-          {pathStr ? <Path d={pathStr} fill="none" stroke="#FFFFFF" strokeWidth={1.8} opacity={0.8} /> : null}
+          {/* Guide grid line */}
+          {activePoint && (
+            <line
+              x1={activePoint.x}
+              y1={paddingY - 10}
+              x2={activePoint.x}
+              y2={viewHeight - paddingY}
+              stroke="url(#guideGlow)"
+              strokeWidth={1.5}
+            />
+          )}
 
-          {/* Hotspots / Dots on vertices */}
-          {points.map((p, idx) => (
-            <React.Fragment key={idx}>
-              <Circle
-                cx={p.x}
-                cy={p.y}
-                r={3.5}
-                fill="#FFFFFF"
-                opacity={p.amount > 0 ? 0.9 : 0.15}
-              />
-              {p.amount > 0 && (
-                <Circle
+          {/* Area spline fill */}
+          {areaPathStr && (
+            <path 
+              d={areaPathStr} 
+              fill="url(#chartGlowArea)" 
+              className="transition-all duration-300"
+            />
+          )}
+
+          {/* Spline Curve stroke */}
+          {pathStr && (
+            <path 
+              d={pathStr} 
+              fill="none" 
+              stroke="#00f2fe" 
+              strokeWidth={2.5} 
+              strokeLinecap="round"
+              className="transition-all duration-300"
+              style={{ filter: 'drop-shadow(0 3px 6px rgba(0, 242, 254, 0.35))' }}
+            />
+          )}
+
+          {/* Node intersections */}
+          {points.map((p, idx) => {
+            const isActive = activeIdx === idx;
+            return (
+              <g key={idx}>
+                {/* Large touch targets */}
+                <circle
                   cx={p.x}
                   cy={p.y}
-                  r={7}
-                  fill="none"
-                  stroke="#FFFFFF"
-                  strokeWidth={1}
-                  opacity={0.25}
+                  r={18}
+                  fill="transparent"
+                  className="cursor-pointer"
+                  onMouseEnter={() => setActiveIdx(idx)}
+                  onMouseLeave={() => setActiveIdx(null)}
+                  onTouchStart={() => setActiveIdx(idx)}
                 />
-              )}
-            </React.Fragment>
-          ))}
-        </Svg>
-      </View>
+                
+                {/* Outer pulsing ring on active */}
+                {isActive && (
+                  <circle
+                    cx={p.x}
+                    cy={p.y}
+                    r={9}
+                    fill="none"
+                    stroke="#ffffff"
+                    strokeWidth={1.2}
+                    opacity={0.6}
+                    className="pointer-events-none animate-ping"
+                  />
+                )}
 
-      {/* X-Axis labels */}
-      <View style={styles.labelsContainer}>
+                {/* Main node dot */}
+                <circle
+                  cx={p.x}
+                  cy={p.y}
+                  r={isActive ? 5 : 3}
+                  fill={isActive ? "#ffffff" : "#00f2fe"}
+                  className="transition-all duration-200 pointer-events-none"
+                  style={{
+                    filter: isActive ? 'drop-shadow(0 0 5px #ffffff)' : 'drop-shadow(0 0 3px rgba(0, 242, 254, 0.55))'
+                  }}
+                />
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+
+      {/* Horizontal grid days */}
+      <div className="flex justify-between mt-2 px-1 select-none">
         {data.map((d, index) => (
-          <Text key={index} style={styles.labelText}>{d.day.toUpperCase()}</Text>
+          <span 
+            key={index} 
+            className={`text-[8px] font-black tracking-widest w-8 text-center transition-colors duration-300 uppercase font-outfit ${
+              activeIdx === index ? 'text-teal-400' : 'text-zinc-500'
+            }`}
+          >
+            {d.day.substring(0, 3)}
+          </span>
         ))}
-      </View>
+      </div>
     </GlassCard>
   );
 };
-
-const styles = StyleSheet.create({
-  card: {
-    padding: 16,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    marginBottom: 20,
-  },
-  chartHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 9,
-    fontWeight: '700',
-    color: '#71717A',
-    letterSpacing: 1.5,
-    fontFamily: Platform.OS === 'ios' ? 'SF Pro Text' : 'sans-serif',
-  },
-  maxSpend: {
-    fontSize: 9,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    letterSpacing: 0.5,
-    fontFamily: Platform.OS === 'ios' ? 'SF Pro Text' : 'sans-serif',
-  },
-  chartContainer: {
-    height: CHART_HEIGHT,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  labelsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
-    paddingHorizontal: 4,
-  },
-  labelText: {
-    fontSize: 8,
-    fontWeight: '700',
-    color: '#71717A',
-    letterSpacing: 1,
-    fontFamily: Platform.OS === 'ios' ? 'SF Pro Text' : 'sans-serif',
-    width: 32,
-    textAlign: 'center',
-  },
-});

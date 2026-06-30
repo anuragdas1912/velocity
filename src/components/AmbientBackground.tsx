@@ -1,113 +1,73 @@
-import React, { useEffect } from 'react';
-import { StyleSheet, View, Dimensions } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withRepeat,
-  withTiming,
-  withSequence,
-} from 'react-native-reanimated';
-
-const { width: windowWidth, height: windowHeight } = Dimensions.get('window');
+import React from 'react';
 
 export const AmbientBackground: React.FC = () => {
-  // Shared values for drifting background auroras
-  const glow1X = useSharedValue(-80);
-  const glow1Y = useSharedValue(-80);
-  
-  const glow2X = useSharedValue(windowWidth - 100);
-  const glow2Y = useSharedValue(windowHeight / 2);
-
-  useEffect(() => {
-    glow1X.value = withRepeat(
-      withSequence(
-        withTiming(windowWidth * 0.25, { duration: 25000 }),
-        withTiming(-100, { duration: 30000 }),
-        withTiming(windowWidth * 0.05, { duration: 22000 })
-      ),
-      -1,
-      true
-    );
-
-    glow1Y.value = withRepeat(
-      withSequence(
-        withTiming(windowHeight * 0.3, { duration: 28000 }),
-        withTiming(-80, { duration: 24000 }),
-        withTiming(windowHeight * 0.45, { duration: 32000 })
-      ),
-      -1,
-      true
-    );
-
-    glow2X.value = withRepeat(
-      withSequence(
-        withTiming(windowWidth * 0.4, { duration: 32000 }),
-        withTiming(windowWidth - 60, { duration: 26000 }),
-        withTiming(windowWidth * 0.15, { duration: 29000 })
-      ),
-      -1,
-      true
-    );
-
-    glow2Y.value = withRepeat(
-      withSequence(
-        withTiming(windowHeight * 0.65, { duration: 27000 }),
-        withTiming(windowHeight / 4, { duration: 35000 }),
-        withTiming(windowHeight * 0.75, { duration: 26000 })
-      ),
-      -1,
-      true
-    );
-  }, []);
-
-  const animatedGlow1Style = useAnimatedStyle(() => {
-    return {
-      transform: [
-        { translateX: glow1X.value },
-        { translateY: glow1Y.value }
-      ],
-    };
-  });
-
-  const animatedGlow2Style = useAnimatedStyle(() => {
-    return {
-      transform: [
-        { translateX: glow2X.value },
-        { translateY: glow2Y.value }
-      ],
-    };
-  });
-
   return (
-    <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
-      {/* Jet Black Base */}
-      <View style={styles.darkBase} />
-
-      {/* Deep Royal Purple Glow */}
-      <Animated.View style={[styles.glowBlob, styles.glowPurple, animatedGlow1Style]} />
+    <div 
+      className="fixed inset-0 w-full h-full overflow-hidden select-none pointer-events-none"
+      style={{ 
+        backgroundColor: '#020205',
+        zIndex: -1 
+      }}
+    >
+      {/* Deep Royal Purple Glow (Increased opacity for rich visual feedback) */}
+      <div 
+        className="absolute rounded-full filter blur-[120px]"
+        style={{
+          width: '500px',
+          height: '500px',
+          background: 'radial-gradient(circle, rgba(79, 70, 229, 0.22) 0%, rgba(0, 0, 0, 0) 70%)',
+          left: '-20%',
+          top: '-15%',
+          animation: 'ambient-pulse 15s ease-in-out infinite',
+        }}
+      />
 
       {/* Deep Emerald Forest Glow */}
-      <Animated.View style={[styles.glowBlob, styles.glowTeal, animatedGlow2Style]} />
-    </View>
+      <div 
+        className="absolute rounded-full filter blur-[120px]"
+        style={{
+          width: '600px',
+          height: '600px',
+          background: 'radial-gradient(circle, rgba(16, 185, 129, 0.18) 0%, rgba(0, 0, 0, 0) 75%)',
+          right: '-20%',
+          bottom: '-10%',
+          animation: 'ambient-pulse 20s ease-in-out infinite alternate',
+        }}
+      />
+
+      {/* Third Violet Glow blob for center-right depth */}
+      <div 
+        className="absolute rounded-full filter blur-[100px]"
+        style={{
+          width: '400px',
+          height: '400px',
+          background: 'radial-gradient(circle, rgba(139, 92, 246, 0.12) 0%, rgba(0, 0, 0, 0) 70%)',
+          right: '10%',
+          top: '25%',
+          animation: 'ambient-pulse 12s ease-in-out infinite alternate-reverse',
+        }}
+      />
+
+      {/* Floating 4D Bubble Particles - slowly drifting upwards and fading */}
+      <div className="absolute inset-0 overflow-hidden opacity-30">
+        <div className="bubble bubble-1" />
+        <div className="bubble bubble-2" />
+        <div className="bubble bubble-3" />
+        <div className="bubble bubble-4" />
+        <div className="bubble bubble-5" />
+      </div>
+
+      {/* Grid Lines Overlay */}
+      <div 
+        className="absolute inset-0 opacity-[0.02]"
+        style={{
+          backgroundImage: `
+            linear-gradient(to right, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(255, 255, 255, 0.08) 1px, transparent 1px)
+          `,
+          backgroundSize: '30px 30px',
+        }}
+      />
+    </div>
   );
 };
-
-const styles = StyleSheet.create({
-  darkBase: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#000000',
-  },
-  glowBlob: {
-    position: 'absolute',
-    borderRadius: 250,
-    width: 380,
-    height: 380,
-    opacity: 0.08, // Very dim, ultra-subtle luxury ambient lighting
-  },
-  glowPurple: {
-    backgroundColor: '#312E81', // Deep indigo purple
-  },
-  glowTeal: {
-    backgroundColor: '#064E3B', // Deep forest/teal green
-  },
-});

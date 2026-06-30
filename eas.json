@@ -1,6 +1,6 @@
 {
   "cli": {
-    "version": ">= 9.0.0"
+    "version": ">= 10.0.0"
   },
   "build": {
     "development": {
@@ -10,12 +10,13 @@
     "preview": {
       "distribution": "internal",
       "ios": {
-        "simulator": false
+        "simulator": true
       }
     },
-    "production": {}
-  },
-  "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "simulator": true
+      }
+    }
   }
 }

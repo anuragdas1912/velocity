@@ -1,0 +1,334 @@
+@import "tailwindcss";
+
+/* Velocity Luxury Design Tokens */
+:root {
+  --bg-primary: #020205;
+  --bg-card: rgba(18, 18, 26, 0.45);
+  --border-glass: rgba(255, 255, 255, 0.05);
+  --border-glass-bevel: rgba(255, 255, 255, 0.12);
+  --border-glass-active: rgba(255, 255, 255, 0.2);
+  
+  /* Luxury Neons */
+  --neon-teal: #00f2fe;
+  --neon-teal-glow: rgba(0, 242, 254, 0.35);
+  --neon-indigo: #6366f1;
+  --neon-indigo-glow: rgba(99, 102, 241, 0.3);
+  --neon-emerald: #10b981;
+  --neon-rose: #ff385c;
+  --neon-rose-glow: rgba(255, 56, 92, 0.3);
+
+  --safe-top: env(safe-area-inset-top, 47px);
+  --safe-bottom: env(safe-area-inset-bottom, 34px);
+}
+
+/* Base resets & iOS Scroll Freeze lock */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100% !important;
+  max-width: 100vw !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  position: fixed;
+  background-color: var(--bg-primary);
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  clip-path: inset(0);
+  -webkit-clip-path: inset(0);
+}
+
+* {
+  box-sizing: border-box;
+  font-family: 'Inter', -apple-system, sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+  outline: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: -0.03em;
+}
+
+/* Centered Smartphone Frame Layout */
+.app-container {
+  overflow-x: hidden !important;
+  max-width: 480px !important;
+  width: 100% !important;
+  margin: 0 auto;
+  left: 50% !important;
+  transform: translateX(-50%);
+  clip-path: inset(0);
+  -webkit-clip-path: inset(0);
+}
+
+/* Premium Beveled Glassmorphism Card (Mac/iOS UI spec) */
+.glass-panel {
+  background: var(--bg-card);
+  backdrop-filter: blur(28px) saturate(130%);
+  -webkit-backdrop-filter: blur(28px) saturate(130%);
+  border: 1px solid var(--border-glass);
+  box-shadow: 
+    inset 0 1px 1px rgba(255, 255, 255, 0.08), /* Top bevel light reflection */
+    0 1px 0 rgba(255, 255, 255, 0.02), /* Bottom accent */
+    0 15px 35px -10px rgba(0, 0, 0, 0.65);
+  border-radius: 24px;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.glass-panel:active {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* iOS Momentum scrollable container */
+.ios-scrollable {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.ios-scrollable::-webkit-scrollbar {
+  display: none;
+}
+
+/* Tab bar design matching native iOS blurs */
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 50% !important;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  height: calc(64px + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  background: rgba(10, 10, 15, 0.75);
+  backdrop-filter: blur(30px) saturate(140%);
+  -webkit-backdrop-filter: blur(30px) saturate(140%);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  z-index: 1000;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.5);
+}
+
+/* Premium Custom iOS Slider (Volume/Brightness style pill) */
+input[type="range"].ios-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  overflow: hidden;
+  outline: none;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+input[type="range"].ios-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 0;
+  box-shadow: -400px 0 0 400px var(--slider-color, #00f2fe);
+}
+
+/* Background floating elements and animations */
+@keyframes float-bubble {
+  0% {
+    transform: translateY(115vh) translateX(0) scale(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.25;
+  }
+  90% {
+    opacity: 0.25;
+  }
+  100% {
+    transform: translateY(-15vh) translateX(60px) scale(1.5);
+    opacity: 0;
+  }
+}
+
+.bubble {
+  position: absolute;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 70%);
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.bubble-1 { width: 50px; height: 50px; left: 10%; animation: float-bubble 24s linear infinite; }
+.bubble-2 { width: 110px; height: 110px; left: 45%; animation: float-bubble 32s linear infinite; animation-delay: -6s; }
+.bubble-3 { width: 75px; height: 75px; left: 75%; animation: float-bubble 28s linear infinite; animation-delay: -14s; }
+.bubble-4 { width: 130px; height: 130px; left: 20%; animation: float-bubble 42s linear infinite; animation-delay: -10s; }
+.bubble-5 { width: 90px; height: 90px; left: 80%; animation: float-bubble 27s linear infinite; animation-delay: -18s; }
+
+@keyframes logo-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.12));
+    transform: scale(0.98);
+  }
+  50% {
+    filter: drop-shadow(0 0 35px rgba(255, 255, 255, 0.35));
+    transform: scale(1.02);
+  }
+}
+
+@keyframes spin-clockwise {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes spin-counterclockwise {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes ambient-pulse {
+  0%, 100% {
+    transform: scale(1) translate(0, 0);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scale(1.1) translate(-3%, 4%);
+    opacity: 0.6;
+  }
+}
+
+/* Classes for animation triggers */
+.animate-morph { animation: morpheus-morph 8s ease-in-out infinite; }
+.animate-spin-cw { animation: spin-clockwise 24s linear infinite; }
+.animate-spin-ccw { animation: spin-counterclockwise 28s linear infinite; }
+.animate-boot-logo { animation: logo-glow 3.5s ease-in-out infinite; }
+
+/* Metallic diagonal sheen overlay for Balance cards */
+.metallic-sheen {
+  position: relative;
+  overflow: hidden;
+}
+
+.metallic-sheen::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(255, 255, 255, 0.045) 45%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.045) 55%,
+    rgba(255, 255, 255, 0) 60%
+  );
+  transform: rotate(-15deg);
+  transition: transform 0.8s ease;
+  pointer-events: none;
+}
+
+.metallic-sheen:hover::before {
+  transform: translateX(40%) rotate(-15deg);
+}
+
+/* Custom PWA Boot screen details */
+.boot-screen {
+  position: fixed;
+  inset: 0;
+  background-color: #030303;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.boot-logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: logo-glow 3.5s ease-in-out infinite;
+}
+
+.boot-logo-img {
+  width: 100px !important;
+  height: 100px !important;
+  max-width: 60vw !important;
+  max-height: 30vh !important;
+  object-fit: contain !important;
+  margin-bottom: 24px;
+  filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.2));
+}
+
+.boot-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.35em;
+  font-family: 'Outfit', sans-serif;
+  text-transform: uppercase;
+  margin-top: 10px;
+}
+
+.boot-divider {
+  width: 48px;
+  height: 2px;
+  background-color: var(--neon-teal);
+  margin-top: 16px;
+  border-radius: 9999px;
+  box-shadow: 0 0 8px var(--neon-teal);
+}
+
+.boot-subtitle {
+  font-size: 8px;
+  font-weight: 700;
+  color: #4a4a58;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+
+.boot-loader-container {
+  position: absolute;
+  bottom: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.boot-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--neon-teal);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin-clockwise 0.8s linear infinite;
+  margin-bottom: 12px;
+}
+
+.boot-loader-text {
+  font-size: 7px;
+  font-weight: 800;
+  color: #27272a;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+}
+
+/* Glass toggle switch layout */
+.glass-switch {
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
+  transition: all 0.3s ease;
+}
+
+.glass-switch-active {
+  background: rgba(0, 242, 254, 0.15);
+  border-color: rgba(0, 242, 254, 0.35);
+  box-shadow: 0 0 10px rgba(0, 242, 254, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+}
