@@ -1,0 +1,17 @@
+{
+  "short_name": "Velocity",
+  "name": "Velocity Budget Tracker",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "type": "image/png",
+      "sizes": "1024x1024",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#030303",
+  "theme_color": "#030303",
+  "display": "standalone",
+  "orientation": "portrait"
+}
