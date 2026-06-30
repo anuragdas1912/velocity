@@ -3,7 +3,7 @@
   "name": "Velocity Budget Tracker",
   "icons": [
     {
-      "src": "/logo.png",
+      "src": "./logo.png",
       "type": "image/png",
       "sizes": "1024x1024",
       "purpose": "any maskable"
