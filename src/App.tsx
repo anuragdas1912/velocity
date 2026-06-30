@@ -59,7 +59,7 @@ export default function App() {
     return (
       <div className={`boot-screen transition-opacity duration-500 ${bootFade ? 'opacity-0' : 'opacity-100'}`}>
         <div className="boot-logo-container">
-          <img src="/logo.png" alt="Velocity Logo" className="boot-logo-img" />
+          <img src="./logo.png" alt="Velocity Logo" className="boot-logo-img" />
           <h1 className="boot-title">Velocity</h1>
           <div className="boot-divider" />
           <p className="boot-subtitle">Budget Tracker</p>
@@ -86,7 +86,7 @@ export default function App() {
         style={{ height: '60px', marginTop: 'env(safe-area-inset-top, 10px)' }}
       >
         <div className="flex items-center gap-2">
-          <img src="/logo.png" alt="logo" className="w-6 h-6 object-contain" />
+          <img src="./logo.png" alt="logo" className="w-6 h-6 object-contain" />
           <span className="text-xs font-black tracking-[0.25em] font-outfit text-white uppercase">
             Velocity
           </span>
@@ -97,17 +97,6 @@ export default function App() {
           <span className="text-[10px] font-bold text-zinc-500 tracking-wider font-mono bg-white/[0.02] border border-white/5 px-2.5 py-1 rounded-lg">
             {timeStr}
           </span>
-          <button 
-            onClick={() => {
-              if (window.confirm("App data reset kerna chahte hain?")) {
-                localStorage.clear();
-                window.location.reload();
-              }
-            }}
-            className="p-2 rounded-full border border-white/5 bg-white/5 active:scale-95 transition-transform"
-          >
-            <RefreshCw size={11} className="text-zinc-500 hover:text-white transition-colors" />
-          </button>
         </div>
       </header>
 

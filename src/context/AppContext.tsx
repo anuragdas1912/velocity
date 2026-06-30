@@ -117,6 +117,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         console.error('Failed to parse saved transactions, resetting', e);
       }
     }
+    
+    // Check if app has been initialized before
+    const isInitialized = localStorage.getItem('velocity_initialized');
+    if (isInitialized) {
+      return []; // Deliberate clean empty state
+    }
+    
+    localStorage.setItem('velocity_initialized', 'true');
     return STARTER_TRANSACTIONS;
   });
 
@@ -129,6 +137,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         console.error('Failed to parse saved milestones, resetting', e);
       }
     }
+    
+    const isInitialized = localStorage.getItem('velocity_initialized');
+    if (isInitialized) {
+      return [];
+    }
+    
     return STARTER_MILESTONES;
   });
 
